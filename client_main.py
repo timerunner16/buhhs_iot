@@ -11,11 +11,18 @@ def connect():
     while True:
         message = input("Message:\n")
         device = int(input("Device:\n"))
-        msg_data = {
-            "message":message,
-            "target_sid":connected_devices[device],
-            "type":"generic_message"
-        }
+        msg_data = {}
+        if (message == 'toggle_light'):
+            msg_data = {
+                "sid":connected_devices[device],
+                "type":"toggle_light"
+            }
+        else:
+            msg_data = {
+                "message":message,
+                "sid":connected_devices[device],
+                "type":"generic_message"
+            }
         sio.emit("rcv_message", msg_data)
 
 @sio.event

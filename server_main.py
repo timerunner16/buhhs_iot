@@ -27,9 +27,11 @@ def rcv_message(sid, data):
     elif (data['type'] == 'generic_message'):
         msg_data = {
             'type':'generic_message',
-            'sid':data['target_sid'],
+            'sid':data['sid'],
             'message':data['message']
         }
+    else:
+        msg_data = data
     sio.emit('rcv_message', msg_data)
 
 @sio.event

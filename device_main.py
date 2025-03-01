@@ -2,6 +2,8 @@ import socketio
 
 sio = socketio.Client()
 
+enabled: bool = False
+
 @sio.event
 def connect():
     print('connection established')
@@ -16,9 +18,14 @@ def connect():
 
 @sio.event
 def rcv_message(data):
+    global enabled
     if (data['sid'] == sio.get_sid()):
-        print("hi im the target device")
-    print(data)
+        print("Current device is targeted by command")
+        if (data['type'] == 'toggle_light'):
+            enabled = not enabled
+            print("Light is now " + ("enabled" if enabled else "disabled"))
+        else:
+            print(data)
 
 @sio.event
 def disconnect():
