@@ -12,9 +12,11 @@ def connect(sid, environ):
     print('connect ', sid)
 
 @sio.event
-def my_message(sid, data):
-    print('message sent by ' + data['sid'], data)
-    sio.emit("my_message", data)
+def message(sid, data):
+    print('message from ' + data['sid'])
+    print('message: ' + data['message'])
+    print('type: ' + data['type'])
+    sio.emit("message", data)
 
 @sio.event
 def disconnect(sid):

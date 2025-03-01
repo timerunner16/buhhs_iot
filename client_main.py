@@ -8,14 +8,30 @@ def connect():
     print('connection established')
 
     while (True):
-        message = input("message here pls ty\n")
-        sio.emit("my_message", {"msg_data":message,"sid":sio.sid})
+        message = input("Message:\n")
+        if (message == 'toggle'):
+            sio.emit(
+                "message", {
+                    "msg_data":message,
+                    "sid":sio.sid,
+                    "type":"toggle"
+                }
+            )
+        else:
+            sio.emit(
+                "message", {
+                    "msg_data":message,
+                    "sid":sio.sid,
+                    "type":"message"
+                }
+            )
 
 @sio.event
-def my_message(data):
+def message(data):
     if (data['sid'] != sio.sid):
-        print('message from ' + data['sid'] + ' with ', data)
-    #sio.emit('my response', {'response': 'my response'})
+        print('message from ' + data['sid'])
+        print('message: ' + data['message'])
+        print('type: ' + data['type'])
 
 @sio.event
 def disconnect():
