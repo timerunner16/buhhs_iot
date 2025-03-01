@@ -1,37 +1,31 @@
 import socketio
-import time
 
 sio = socketio.Client()
+
+connected_devices = []
 
 @sio.event
 def connect():
     print('connection established')
 
-    while (True):
+    while True:
         message = input("Message:\n")
-        if (message == 'toggle'):
-            sio.emit(
-                "message", {
-                    "msg_data":message,
-                    "sid":sio.sid,
-                    "type":"toggle"
-                }
-            )
-        else:
-            sio.emit(
-                "message", {
-                    "msg_data":message,
-                    "sid":sio.sid,
-                    "type":"message"
-                }
-            )
+        device = int(input("Device:\n"))
+        msg_data = {
+            "message":message,
+            "target_sid":connected_devices[device],
+            "type":"generic_message"
+        }
+        sio.emit("rcv_message", msg_data)
 
 @sio.event
-def message(data):
-    if (data['sid'] != sio.sid):
-        print('message from ' + data['sid'])
-        print('message: ' + data['message'])
-        print('type: ' + data['type'])
+def rcv_message(data):
+    if (data['type'] == 'interface_add_device'):
+        print('added device', data['sid'])
+        connected_devices.append(data['sid'])
+    elif (data['type'] == 'interface_remove_device'):
+        print('removed device', data['sid'])
+        connected_devices.remove(data['sid'])
 
 @sio.event
 def disconnect():

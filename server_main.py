@@ -1,26 +1,42 @@
 import eventlet
 import socketio
-import time
 
 sio = socketio.Server()
-app = socketio.WSGIApp(sio, static_files={
-    '/': {'content_type': 'text/html', 'filename': 'index.html'}
-})
+app = socketio.WSGIApp(sio)
+
+connected_devices = []
 
 @sio.event
 def connect(sid, environ):
-    print('connect ', sid)
+    print('connect', sid)
 
 @sio.event
-def message(sid, data):
-    print('message from ' + data['sid'])
-    print('message: ' + data['message'])
-    print('type: ' + data['type'])
-    sio.emit("message", data)
+def rcv_message(sid, data):
+    print("message", sid, data)
+    msg_data = {}
+    if (data['type'] == 'register_device'):
+        msg_data = {
+            'type':'interface_add_device',
+            'sid':sid
+        }
+    elif (data['type'] == 'remove_device'):
+        msg_data = {
+            'type':'interface_remove_device',
+            'sid':sid
+        }
+    elif (data['type'] == 'generic_message'):
+        msg_data = {
+            'type':'generic_message',
+            'sid':data['target_sid'],
+            'message':data['message']
+        }
+    sio.emit('rcv_message', msg_data)
 
 @sio.event
 def disconnect(sid):
     print('disconnect ', sid)
-
-if __name__ == '__main__':
+    msg_data = {'type':'remove_device'}
+    rcv_message(sid, msg_data)
+    
+if (__name__ == '__main__'):
     eventlet.wsgi.server(eventlet.listen(('', 5000)), app)
